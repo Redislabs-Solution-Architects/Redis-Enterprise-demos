@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+function makeTableHTML(caption, myArray) {
+    var result = "<caption>" + caption + "</caption><tr><th>Player</th><th>Score</th></tr>";
+    for(var i=0; i<myArray.length; i++) {
+        if ( i % 2 == 0 )
+            result += "<tr>";
+        result += "<td>"+myArray[i]+"</td>";
+        if ( i % 2 == 1 )
+            result += "</tr>";
+    }
+    result += "";
+    return result;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var socket = io();
+    socket.on('update_cache', function(data) {
+        document.getElementById('cache1').innerHTML = data.cache1;
+        document.getElementById('cache2').innerHTML = data.cache2;
+    });
+    socket.on('update_votes', function(data) {
+        document.getElementById('votes1').innerHTML = data.votes1;
+        document.getElementById('votes2').innerHTML = data.votes2;
+    });
+    socket.on('update_scores', function(data) {
+        document.getElementById('scores1').innerHTML = makeTableHTML("Scores Cluster 1", data.scores1);
+        document.getElementById('scores2').innerHTML = makeTableHTML("Scores Cluster 2", data.scores2);
+    });
+});
+</script>
+<script>
+   function votef() {
+  	if ( document.getElementById('vote_toggle').value == 'Stop Voting' ) {
+	   document.getElementById('vote_toggle').value = 'Resume Voting';
+	   document.getElementById('vote').action = '/stop/vote';
+	}
+	else
+	{
+	   document.getElementById('vote_toggle').value = 'Stop Voting';
+           document.getElementById('vote').action = '/start/vote';
+        }
+        return true;
+   }
+
+   function gamef() {
+        if ( document.getElementById('game_toggle').value == 'Stop Game' ) {
+           document.getElementById('game_toggle').value = 'Resume Game';
+           document.getElementById('game').action = '/stop/game';
+        }
+        else
+        {
+           document.getElementById('game_toggle').value = 'Stop Game';
+           document.getElementById('game').action = '/start/game';
+        }
+        return true;
+   }
+
+
+</script>
+</head>
+<body>
+    <h1>CRDB Demo</h1>
+    <h3>Use case: Caching</h3>
+    <h4>This use case uses the string data type to share caching data between 2 data centers.</h4>
+    <form id="cache" method="post">
+     Cache value: <INPUT type="TEXT" name="cache"><BR>
+     <button type="submit" onclick='this.form.action="/cache/1";'>Cache 1</button>
+     <button type="submit" onclick='this.form.action="/cache/2";'>Cache 2</button>
+    </form>
+    <table>
+    <tr>    
+	<td><b>Cache Cluster 1:</b> </td>
+	<td id="cache1" title="Cache 1"></td>
+    </tr>
+    <tr>
+	<td><b>Cache Cluster 2:</b> </td>
+ 	<td id="cache2" title="Cache 2"></td>
+    </tr>
+    </table>
+    <hr/>
+    <h3>Use case: Voting</h3>
+    <h4>This use case uses the numeric data type to aggregate votes from 2 data centers.</h4>
+    <form id="vote" method="post" onSubmit="return votef()">
+     <input id="vote_toggle" type="submit" value="Start Voting">
+    </form>
+    <table>
+    <tr>
+	<td><b>Votes Cluster 1:</b> </td>
+	<td id="votes1" title="Votes 1"></td>
+    </tr>
+    <tr>
+	<td><b>Votes Cluster 2:</b> </td>
+ 	<td id="votes2" title="Votes 2"></td>
+    </tr>
+    </table>
+    <hr/>
+    <h3>Use case: Game scores</h3>
+    <h4>This use case uses the sorted set data type to aggregate game scores from 2 data centers and displays the results soreted by highest to lowest score.</h4>
+    <form id="game" method="post" onSubmit="return gamef()">
+    <input id="game_toggle" type="submit" value="Start Game">
+    </form>
+    <table>
+    <div>
+    <table id="scores1" border="1" style="float: left" width="400">
+    </table>
+    <table id="scores2" border="1" style="float: left" width="400"/>
+    </table>
+    </div>
+</body>
+</html>
