@@ -1,0 +1,20 @@
+#Find zip code and geo position:
+FT.SEARCH zillow "*" return 2 regionidzip geopos
+#Find houses within 1 mile from the geo position:
+FT.SEARCH zillow "@regionidzip:96464 @geopos:[-117.885804 34.114736  1 mi]" return 2 bedroomcnt bathroomcnt
+#Sort by bed rooms:
+FT.SEARCH zillow "@regionidzip:96464 @geopos:[-117.885804 34.114736  1 mi]" return 2 bedroomcnt bathroomcnt SORTBY bedroomcnt desc
+#Filter by bedrooms and bathrooms number, sort by year built:
+FT.SEARCH zillow "@bedroomcnt:[4, inf] @bathroomcnt:[3 inf] @geopos:[-118.578052 34.209413 1 mi]" return 3 bedroomcnt bathroomcnt yearbuilt SORTBY yearbuilt desc
+#Filter by bedrooms, bathrooms, year built and value:
+FT.SEARCH zillow "@bedroomcnt:[4, inf] @bathroomcnt:[3 inf] @yearbuilt:[1960 1990] @taxvaluedollarcnt:[-inf 400000] @geopos:[-118.578052 34.209413 1 mi]" return 4 bedroomcnt bathroomcnt yearbuilt taxvaluedollarcnt SORTBY taxvaluedollarcnt
+#10 zip codes with most properties:
+FT.AGGREGATE zillow "*" GROUPBY 1 @regionidzip reduce count 0 as Count SORTBY 2 @Count desc limit 0 10
+#10 zip codes with highest average value:
+FT.AGGREGATE zillow "*" GROUPBY 1 @regionidzip reduce AVG 1 @taxvaluedollarcnt as Avg_Value reduce count 0 as Count SORTBY 2 @Avg_Value desc limit 0 10
+#Number of properties by bedroom count for a specific zip code:
+FT.AGGREGATE zillow "@regionidzip:96193" GROUPBY 1 @bedroomcnt reduce count 0 as Count sortby 1 @bedroomcnt
+#Find geo position for zip code:
+FT.SEARCH zillow "@regionidzip:96193" return 2 regionidzip geopos
+#Property count by number of bedrooms for a zipcode within 1 mile from the geo position:
+FT.AGGREGATE zillow "@regionidzip:96193 @geopos:[-118.062853 33.892039  1 mi]" GROUPBY 1 @bedroomcnt reduce count 0 as Count sortby 1 @bedroomcnt
