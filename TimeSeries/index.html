@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<head>
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+  
+  function time(s) {
+    return new Date(s * 1e3).toISOString().slice(-13, -5);
+  }
+
+  var layout = {
+    title: 'Time Series',
+    xaxis: {
+      title: 'Time',
+      showgrid: true,
+      zeroline: false
+    },
+    yaxis: {
+      title: 'Value',
+      showline: false
+   }
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var socket = io();
+    socket.on('update_ts', function(data) {
+        var x = [];
+        var y = [];
+        var xmin = [];
+        var ymin = [];
+        var xmax = [];
+        var ymax = []
+        for (var i = 0; i < data.latest.length; i++) {
+           x.push(time(data.latest[i][0]));
+           y.push(data.latest[i][1]);
+        }
+        for ( var i = 0; i < data.latest_min.length; i++ ) {
+           xmin.push(time(data.latest_min[i][0]));
+           ymin.push(data.latest_min[i][1]);
+        }
+        for ( var i = 0; i < data.latest_max.length; i++ ) {
+           xmax.push(time(data.latest_max[i][0]));
+           ymax.push(data.latest_max[i][1]);
+        }
+        
+        ts_doc = document.getElementById('ts');
+        var trace1 = 
+        { x: x,
+          y: y,
+          type: "scatter",
+          name: "Data Points"
+        };
+
+        var trace2 = 
+        { x: xmin,
+          y: ymin,
+          type: "scatter",
+          name: "Min"
+        };
+  
+        var trace3 =
+        { x: xmax,
+          y: ymax,
+          type: "scatter",
+          name: "Max"
+        };
+        
+        Plotly.newPlot( ts_doc, [trace1, trace2, trace3], layout );
+
+    });
+  });
+  </script>
+
+</head>
+<body>
+<div id="ts"></div>
+</body>
+</html>
