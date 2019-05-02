@@ -1,4 +1,4 @@
-#Redis Enterprise Demos
+# Redis Enterprise Demos
 
 This repository contains demos for the following redis Enterprise capabilities:
 
