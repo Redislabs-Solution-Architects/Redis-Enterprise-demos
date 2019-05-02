@@ -1,0 +1,12 @@
+#Is there a direct flight from STL to ANC:
+match (from:airport {code: "STL"} )-[:ROUTE]->(to:airport {code: "ANC"}) return count(from) as Flights
+#How many flights are there with up to 2 connections between STL and ANC:
+match (from:airport {code: "STL"} )-[:ROUTE*1..3]->(to:airport {code: "ANC"}) return count(from) as Flights
+#Where can you fly directrly from STL:
+match (from:airport {code: "STL"} )-[:ROUTE]->(to:airport) return to.description
+#Direct flights from STL which are less thatn 300 miles sorted by distance:
+match (from:airport {code: "STL"} )-[r:ROUTE]->(to:airport) where r.dist < 300 return to.description as Destination, r.dist as Distance order by r.dist
+#10 shortest routes from EWR to PHX with one connection:
+match (from:airport {code: "EWR"} )-[r1:ROUTE]->(via:airport)-[r2:ROUTE]->(to:airport {code: "PHX"}) return from.code as From, via.code as Via, to.code as To, r1.dist + r2.dist as Distance order by Distance limit 10
+#Number of destinations from the largest airports in the US:
+match (from:airport)-[:ROUTE]->(to:airport) where from.code = "ORD" OR from.code = "ATL" OR from.code = "DFW" OR from.code = "LAX" OR from.code = "JFK" return from.code as Airport, count(to) as Destinations order by Destinations desc

@@ -1,0 +1,20 @@
+#10 teams with most players:
+MATCH (p:Player)-[:PLAYS_FOR]->(c:Club) RETURN c.name AS Club, COUNT(p) AS Players order by Players desc limit 10
+#Players representing spain:
+MATCH (c:Club)<-[:PLAYS_FOR]-(p:Player)-[:REPRESENTS]->(n:NationalTeam) WHERE n.name = "Spain"  RETURN p.name AS Player, c.name AS Club
+#With breakdown for club:
+MATCH (c:Club)<-[:PLAYS_FOR]-(p:Player)-[:REPRESENTS]->(n:NationalTeam {name:"Spain"})   RETURN c.name AS Club, COUNT(p) AS Players ORDER BY Players DESC
+#Players of Manchester United with break down to nationality:
+MATCH (c:Club)<-[:PLAYS_FOR]-(p:Player)-[:REPRESENTS]->(n:NationalTeam) WHERE c.name="Manchester United" RETURN n.name AS Nation, COUNT(p) AS Players ORDER BY Players DESC
+#Foreign Manchester United players:
+MATCH (c:Club)<-[:PLAYS_FOR]-(p:Player)-[:REPRESENTS]->(n:NationalTeam) WHERE c.name="Manchester United" and n.name != "England" RETURN p.name AS Player, n.name AS Nation
+#Which national team needed minimum number of clubs to form the team:
+MATCH (c:Club)<-[:PLAYS_FOR]-(p:Player)-[:REPRESENTS]->(n:NationalTeam) RETURN n.name as Nation, COUNT(c) AS Clubs ORDER BY Clubs ASC
+#Players of Barcelona who may face each other:
+MATCH (n1:NationalTeam)<-[:REPRESENTS]-(p1:Player)-[:PLAYS_FOR]->(c:Club {name:"FC Barcelona"})<-[:PLAYS_FOR]-(p2:Player)-[:REPRESENTS]->(n2:NationalTeam) WHERE p1.name != p2.name and n1.name != n2.name return p1.name AS Player1, n1.name AS Nation1, p2.name AS Player2, n2.name AS Nation2
+#French players playing for the same club:
+MATCH (c1:Club)<-[:PLAYS_FOR]-(p1:Player)-[:REPRESENTS]->(n1:NationalTeam {name:"France"})<-[:REPRESENTS]-(p2:Player)-[:PLAYS_FOR]->(c2:Club) WHERE c1.name = c2.name and p1.name != p2.name RETURN p1.name AS Player1, p2.name AS Player2, c1.name AS Club
+#French players playing for a club not from France:
+MATCH (c:Club)<-[:PLAYS_FOR]-(p:Player)-[:REPRESENTS]->(n:NationalTeam) WHERE n.name = "France" and c.country != "France"  RETURN p.name AS Player, c.name AS Club
+#National Team  with most players playing for local clusbs:
+MATCH (c:Club)<-[:PLAYS_FOR]-(p:Player)-[:REPRESENTS]->(n:NationalTeam) WHERE n.name = c.country RETURN n.name AS Nation, COUNT(p) AS Players ORDER BY Players DESC
